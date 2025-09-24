@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -19,12 +19,41 @@ export class GameService {
 		return newGame;
 	}
 
-	async findAll() {
-		return `This action returns all game`;
+	async makeGuess(gameId: number, value: number) {
+		const game = await this.prisma.game.findUnique({
+			where: { id: gameId }
+		});
+		if (!game) {
+			throw new NotFoundException('Game not found');
+		}
+		let result: string;
+		if (value === game.number) {
+			result = 'We are victoius';
+			await this.prisma.game.update({
+				where: { id: gameId },
+				data: { finished: true },
+			});
+		} else if (value < game.number) {
+			result = 'kichik';
+		} else {
+			result = 'katta';
+		}
+
+		return this.prisma.guess.create({
+			data: { gameId, value, result },
+		});
 	}
 
+
 	async findOne(id: number) {
-		return `This action returns a #${id} game`;
+		const game = await this.prisma.game.findUnique({
+			where: { id },
+			include: { guesses: true },
+		});
+		if (!game) {
+			throw new NotFoundException('Game not found');
+		}
+		return game;
 	}
 
 	async update(id: number, updateGameDto: UpdateGameDto) {

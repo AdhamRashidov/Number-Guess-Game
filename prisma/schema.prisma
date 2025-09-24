@@ -33,4 +33,6 @@ model Guess {
 	id 			Int			@default(autoincrement()) @id
 	gameId		Int
 	game		Game		@relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+	value 		Int
+	result 		String
 }

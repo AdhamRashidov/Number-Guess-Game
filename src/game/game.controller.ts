@@ -3,6 +3,7 @@ import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 
+
 @Controller('game')
 export class GameController {
 	constructor(private readonly gameService: GameService) { }
@@ -12,9 +13,12 @@ export class GameController {
 		return this.gameService.create(userId);
 	}
 
-	@Get()
-	findAll() {
-		return this.gameService.findAll();
+	@Post('guess/:id')
+	inputGuess(
+		@Param('id', ParseIntPipe) gameId: number,
+		@Body('value', ParseIntPipe) value: number,
+	) {
+		return this.gameService.makeGuess(gameId, value);
 	}
 
 	@Get(':id')
